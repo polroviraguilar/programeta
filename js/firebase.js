@@ -1,126 +1,159 @@
-// js/firebase.js
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-import { 
-  getAuth, onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut
-} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js';
 import {
-  getFirestore, collection, addDoc, getDocs, query, where,
-  doc, updateDoc, deleteDoc, setDoc, serverTimestamp
-} from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile
+} from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  writeBatch
+} from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-// 🔧 CONFIGURACIÓ: copia la teva de Firebase Console → Project settings → Web app
 const firebaseConfig = {
-  apiKey: "AIzaSyCrDmpdYr9c55SR2ZbNsYVBzsgXxHM9h5k",
-  authDomain: "programeta-cc218.firebaseapp.com",
-  projectId: "programeta-cc218",
-  storageBucket: "programeta-cc218.firebasestorage.app",
-  messagingSenderId: "1004120651589",
-  appId: "1:1004120651589:web:9313cd2adf287f8c5e302c"
+  apiKey: 'AIzaSyCrDmpdYr9c55SR2ZbNsYVBzsgXxHM9h5k',
+  authDomain: 'programeta-cc218.firebaseapp.com',
+  projectId: 'programeta-cc218',
+  storageBucket: 'programeta-cc218.firebasestorage.app',
+  messagingSenderId: '1004120651589',
+  appId: '1:1004120651589:web:9313cd2adf287f8c5e302c'
 };
 
-// Inicialització
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// ──────────────────────────────────────────
-// AUTENTICACIÓ AMB EMAIL / PASSWORD
-// ──────────────────────────────────────────
-
-// Quan l’usuari entra o surt
-onAuthStateChanged(auth, (user)=>{
-  const emailSpan = document.getElementById("userEmail");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const loginToggle = document.getElementById("loginToggle");
-
-  if(user){
-    console.log("Usuari connectat:", user.email);
-    if(emailSpan) emailSpan.textContent = user.email;
-    if(logoutBtn) logoutBtn.classList.remove("hidden");
-    if(loginToggle) loginToggle.classList.add("hidden");
-  }else{
-    console.log("Ningú connectat");
-    if(emailSpan) emailSpan.textContent = "";
-    if(logoutBtn) logoutBtn.classList.add("hidden");
-    if(loginToggle) loginToggle.classList.remove("hidden");
-  }
+const persistenceReady = setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.warn('No s\'ha pogut activar la persistència local de la sessió.', error);
 });
 
-// Login
-export async function login(email, pass){
-  return signInWithEmailAndPassword(auth, email, pass);
+export function watchAuth(callback) {
+  return onAuthStateChanged(auth, callback);
 }
 
-// Registre
-export async function register(email, pass){
-  return createUserWithEmailAndPassword(auth, email, pass);
+export async function login(email, password) {
+  await persistenceReady;
+  return signInWithEmailAndPassword(auth, email.trim(), password);
 }
 
-// Logout
-export async function logout(){
+export async function register(displayName, email, password) {
+  await persistenceReady;
+  const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+  const cleanName = displayName.trim();
+  if (cleanName) {
+    await updateProfile(credential.user, { displayName: cleanName });
+  }
+  return credential;
+}
+
+export async function resetPassword(email) {
+  return sendPasswordResetEmail(auth, email.trim());
+}
+
+export async function logout() {
   return signOut(auth);
 }
 
-// ──────────────────────────────────────────
-// HORARI (setmanal / anual)
-// ──────────────────────────────────────────
-export async function addFranja(uid, data) {
-  const colRef = collection(db, 'users', uid, 'horariSetmanal');
-  return await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
+function scheduleCollection(uid) {
+  return collection(db, 'users', uid, 'horariSetmanal');
 }
 
-export async function updateFranja(uid, id, data) {
-  await updateDoc(doc(db, 'users', uid, 'horariSetmanal', id), data);
+function settingsDocument(uid) {
+  return doc(db, 'users', uid, 'settings', 'preferences');
 }
 
-export async function deleteFranja(uid, id) {
+export function watchScheduleEntries(uid, onData, onError = console.error) {
+  return onSnapshot(
+    scheduleCollection(uid),
+    snapshot => {
+      onData(snapshot.docs.map(item => ({ id: item.id, ...item.data() })));
+    },
+    onError
+  );
+}
+
+export async function saveScheduleEntry(uid, entry, id = null) {
+  const payload = {
+    ...entry,
+    updatedAt: serverTimestamp()
+  };
+
+  if (id) {
+    await updateDoc(doc(db, 'users', uid, 'horariSetmanal', id), payload);
+    return id;
+  }
+
+  const reference = await addDoc(scheduleCollection(uid), {
+    ...payload,
+    createdAt: serverTimestamp()
+  });
+  return reference.id;
+}
+
+export async function removeScheduleEntry(uid, id) {
   await deleteDoc(doc(db, 'users', uid, 'horariSetmanal', id));
 }
 
-export async function listFrangesForWeek(uid, any, setmana) {
-  const colRef = collection(db, 'users', uid, 'horariSetmanal');
-
-  // 1) Permanents
-  const qPerm = query(colRef, where('setmana', '==', 0));
-  const snapPerm = await getDocs(qPerm);
-
-  // 2) Ocasional d’aquesta setmana
-  const qOcc = query(colRef, where('setmana', '==', setmana), where('any', '==', any));
-  const snapOcc = await getDocs(qOcc);
-
-  return [...snapPerm.docs, ...snapOcc.docs].map(d => ({ id: d.id, ...d.data() }));
+export function watchPreferences(uid, onData, onError = console.error) {
+  return onSnapshot(
+    settingsDocument(uid),
+    snapshot => onData(snapshot.exists() ? snapshot.data() : null),
+    onError
+  );
 }
 
-export async function setHorariSetmana(uid, setmana, any, activitats) {
-  const ref = doc(db, 'users', uid, 'horariAnual', `${any}-${String(setmana).padStart(2,'0')}`);
-  await setDoc(ref, { setmana, any, activitats, updatedAt: serverTimestamp() });
+export async function savePreferences(uid, preferences) {
+  await setDoc(settingsDocument(uid), {
+    ...preferences,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
 }
 
-// ──────────────────────────────────────────
-// LLIÇONARI
-// ──────────────────────────────────────────
-export async function addLlico(uid, { curs, assignatura, titol, descripcio, recursos }) {
-  const colRef = collection(db, 'users', uid, 'lliçons');
-  return await addDoc(colRef, {
-    curs, assignatura, titol, descripcio,
-    recursos: recursos || [],
-    createdAt: serverTimestamp()
-  });
-}
+export async function replaceScheduleEntries(uid, entries) {
+  const current = await getDocs(scheduleCollection(uid));
+  let batch = writeBatch(db);
+  let operations = 0;
 
-export async function listLlicons(uid, { curs, assignatura } = {}) {
-  const colRef = collection(db, 'users', uid, 'lliçons');
-  let q = colRef;
-  if (curs && assignatura) q = query(colRef, where('curs','==',curs), where('assignatura','==',assignatura));
-  else if (curs) q = query(colRef, where('curs','==',curs));
-  else if (assignatura) q = query(colRef, where('assignatura','==',assignatura));
-  const snap = await getDocs(q);
-  return snap.docs.map(d=>({ id:d.id, ...d.data() }));
-}
+  const commitIfNeeded = async force => {
+    if (operations === 0) return;
+    if (force || operations >= 400) {
+      await batch.commit();
+      batch = writeBatch(db);
+      operations = 0;
+    }
+  };
 
-export async function deleteLlico(uid, id) {
-  await deleteDoc(doc(db, 'users', uid, 'lliçons', id));
+  for (const item of current.docs) {
+    batch.delete(item.ref);
+    operations += 1;
+    await commitIfNeeded(false);
+  }
+
+  for (const entry of entries) {
+    const reference = doc(scheduleCollection(uid));
+    const { id: _ignoredId, createdAt: _ignoredCreatedAt, updatedAt: _ignoredUpdatedAt, ...cleanEntry } = entry;
+    batch.set(reference, {
+      ...cleanEntry,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    operations += 1;
+    await commitIfNeeded(false);
+  }
+
+  await commitIfNeeded(true);
 }
