@@ -1,398 +1,733 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="ca" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f3ce62">
-  <meta name="description" content="Programeta, planificació docent setmanal i lliçonari digital.">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Programeta, la llibreta docent digital per planificar l'horari i consultar el lliçonari." />
+  <meta name="theme-color" content="#f6d365" />
   <title>Programeta</title>
-  <link rel="icon" type="image/svg+xml" href="assets/logo-icon.svg">
-  <link rel="icon" type="image/png" href="assets/logo-icon.png">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="icon" type="image/png" href="assets/logo-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <script>
+    (() => {
+      const savedTheme = localStorage.getItem('programeta-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    })();
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#mainContent">Salta al contingut</a>
 
-  <header class="topbar">
-    <div class="topbar__inner">
-      <a class="brand" href="#" aria-label="Programeta, inici">
-        <img class="brand__img" src="assets/logo-wordmark.svg" alt="Programeta" width="190" height="44">
-      </a>
+  <!-- =======================================================
+       PORTA D'ACCÉS
+       ======================================================= -->
+  <section id="authView" class="auth-view" aria-label="Accés a Programeta">
+    <div class="auth-brand-panel">
+      <div class="auth-brand-content">
+        <img
+          id="authBrandLogo"
+          class="auth-logo"
+          src="assets/logo-tipo-umbra.png"
+          alt="Programeta"
+        />
 
-      <div class="topbar__actions">
-        <div id="userChip" class="user-chip hidden" aria-live="polite">
-          <span class="user-chip__avatar" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0"/></svg>
-          </span>
-          <span class="user-chip__text">
-            <strong id="userName">Usuari</strong>
-            <span id="userEmail"></span>
-          </span>
+        <div class="auth-copy">
+          <p class="eyebrow">La teva llibreta docent digital</p>
+          <h1>Planifica amb calma. Recupera-ho tot quan ho necessitis.</h1>
+          <p>
+            Organitza les sessions, consulta l'historial d'activitats i treballa
+            des de qualsevol dispositiu amb les dades sincronitzades.
+          </p>
         </div>
 
-        <button id="openSettings" class="icon-button hidden" type="button" aria-label="Obre la configuració" title="Configuració">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+        <ul class="auth-benefits" aria-label="Funcionalitats principals">
+          <li>
+            <span class="benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7 2v3M17 2v3M3.5 9h17M5.5 4h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>
+            </span>
+            <span><strong>Horari clar</strong>Planificació setmanal i anual.</span>
+          </li>
+          <li>
+            <span class="benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z"/></svg>
+            </span>
+            <span><strong>Lliçonari útil</strong>Troba totes les activitats per curs i assignatura.</span>
+          </li>
+          <li>
+            <span class="benefit-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7.5 18.5h9a4 4 0 0 0 .6-8 5.5 5.5 0 0 0-10.6-1.4A4.8 4.8 0 0 0 7.5 18.5Z"/><path d="m9.5 13 2.5-2.5 2.5 2.5M12 10.8V17"/></svg>
+            </span>
+            <span><strong>Sincronització</strong>Les teves dades, disponibles a tot arreu.</span>
+          </li>
+        </ul>
+      </div>
+      <div class="auth-decoration auth-decoration-one" aria-hidden="true"></div>
+      <div class="auth-decoration auth-decoration-two" aria-hidden="true"></div>
+    </div>
+
+    <div class="auth-form-panel">
+      <div class="auth-form-wrap">
+        <button id="authThemeToggle" class="round-icon-button auth-theme-button" type="button" aria-label="Canvia el tema">
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8 8 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
         </button>
 
-        <button id="openLogin" class="icon-button" type="button" aria-label="Inicia sessió" title="Inicia sessió">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/></svg>
-        </button>
+        <div id="authMessage" class="form-message hidden" role="alert"></div>
 
-        <button id="btnLogout" class="icon-button hidden" type="button" aria-label="Tanca la sessió" title="Tanca la sessió">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 17l5-5-5-5M19 12H7M10 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
-        </button>
+        <form id="loginForm" class="auth-form" novalidate>
+          <div class="auth-heading">
+            <p class="eyebrow">Benvinguda</p>
+            <h2>Entra a Programeta</h2>
+            <p>Continua la teva planificació allà on la vas deixar.</p>
+          </div>
+
+          <label class="field">
+            <span>Correu electrònic</span>
+            <input id="loginEmail" type="email" autocomplete="email" required placeholder="nom@exemple.cat" />
+          </label>
+
+          <label class="field">
+            <span>Contrasenya</span>
+            <span class="password-field">
+              <input id="loginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="La teva contrasenya" />
+              <button class="password-toggle" type="button" data-password-target="loginPassword" aria-label="Mostra o amaga la contrasenya">
+                <svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+              </button>
+            </span>
+          </label>
+
+          <button id="loginSubmit" class="button button-primary button-wide" type="submit">
+            <span>Inicia la sessió</span>
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M14 7l5 5-5 5"/></svg>
+          </button>
+
+          <button id="showReset" class="text-button" type="button">Has oblidat la contrasenya?</button>
+
+          <p class="auth-switch">Encara no tens compte? <button id="showRegister" type="button">Crea'n un</button></p>
+        </form>
+
+        <form id="registerForm" class="auth-form hidden" novalidate>
+          <div class="auth-heading">
+            <p class="eyebrow">Comença</p>
+            <h2>Crea el teu compte</h2>
+            <p>Configura la teva llibreta docent en menys de dos minuts.</p>
+          </div>
+
+          <label class="field">
+            <span>Nom</span>
+            <input id="registerName" type="text" autocomplete="name" required maxlength="80" placeholder="El teu nom" />
+          </label>
+
+          <label class="field">
+            <span>Correu electrònic</span>
+            <input id="registerEmail" type="email" autocomplete="email" required placeholder="nom@exemple.cat" />
+          </label>
+
+          <label class="field">
+            <span>Contrasenya</span>
+            <span class="password-field">
+              <input id="registerPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="Mínim 6 caràcters" />
+              <button class="password-toggle" type="button" data-password-target="registerPassword" aria-label="Mostra o amaga la contrasenya">
+                <svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+              </button>
+            </span>
+          </label>
+
+          <label class="field">
+            <span>Repeteix la contrasenya</span>
+            <input id="registerPasswordConfirm" type="password" autocomplete="new-password" required minlength="6" placeholder="Repeteix-la" />
+          </label>
+
+          <button id="registerSubmit" class="button button-primary button-wide" type="submit">Crea el compte</button>
+          <p class="auth-switch">Ja tens compte? <button id="backToLoginFromRegister" type="button">Inicia la sessió</button></p>
+        </form>
+
+        <form id="resetForm" class="auth-form hidden" novalidate>
+          <div class="auth-heading">
+            <p class="eyebrow">Recuperació</p>
+            <h2>Recupera la contrasenya</h2>
+            <p>T'enviarem un enllaç perquè en puguis crear una de nova.</p>
+          </div>
+
+          <label class="field">
+            <span>Correu electrònic</span>
+            <input id="resetEmail" type="email" autocomplete="email" required placeholder="nom@exemple.cat" />
+          </label>
+
+          <button id="resetSubmit" class="button button-primary button-wide" type="submit">Envia l'enllaç</button>
+          <button id="backToLoginFromReset" class="text-button" type="button">Torna a l'inici de sessió</button>
+        </form>
       </div>
     </div>
-  </header>
+  </section>
 
-  <div id="loadingScreen" class="loading-screen" role="status" aria-live="polite">
-    <span class="spinner" aria-hidden="true"></span>
-    <span>Carregant Programeta…</span>
-  </div>
-
-  <div id="appShell" class="app-shell hidden">
-    <aside class="sidebar" aria-label="Navegació principal">
-      <nav id="mainNavigation" class="side-nav">
-        <button class="side-link active" type="button" data-view="schedule">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2v3M18 2v3M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z"/></svg>
-          <span>Horari</span>
+  <!-- =======================================================
+       APLICACIÓ PRIVADA
+       ======================================================= -->
+  <section id="appView" class="app-view hidden" aria-label="Aplicació Programeta">
+    <header class="app-header">
+      <div class="app-header-left">
+        <button id="sidebarToggle" class="round-icon-button" type="button" aria-label="Obre o tanca el menú" aria-controls="sidebar" aria-expanded="true">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        <button class="side-link" type="button" data-view="lessonbook">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
-          <span>Lliçonari</span>
-        </button>
-      </nav>
-
-      <div class="sidebar__note">
-        <strong>Programeta</strong>
-        <span>Planifica amb calma. Recupera-ho tot quan ho necessitis.</span>
+        <img id="appBrandLogo" class="app-logo" src="assets/logo-tipo-umbra.png" alt="Programeta" />
       </div>
-    </aside>
 
-    <main id="mainContent" class="content" tabindex="-1">
-      <section id="viewSchedule" class="view-panel">
-        <div class="page-heading">
-          <div>
-            <p class="eyebrow">Planificació docent</p>
-            <h1>Horari</h1>
-            <p>Organitza la setmana, crea excepcions puntuals i mantén les activitats recurrents sota control.</p>
-          </div>
-          <div class="page-heading__status">
-            <span class="status-dot"></span>
-            <span>Desat automàticament al núvol</span>
+      <div class="app-header-context">
+        <strong id="currentSectionTitle">Horari</strong>
+        <span id="syncStatus" class="sync-status" data-state="idle">
+          <span class="sync-dot"></span>
+          <span class="sync-label">Preparat</span>
+        </span>
+      </div>
+
+      <div class="app-header-actions">
+        <button id="themeToggle" class="round-icon-button" type="button" aria-label="Canvia el tema">
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8 8 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+        </button>
+
+        <div class="user-menu-wrap">
+          <button id="userMenuToggle" class="user-chip" type="button" aria-expanded="false" aria-controls="userMenu">
+            <span id="userAvatar" class="user-avatar">P</span>
+            <span class="user-chip-copy">
+              <strong id="userDisplayName">Usuari</strong>
+              <small id="userEmail">—</small>
+            </span>
+            <svg viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></svg>
+          </button>
+
+          <div id="userMenu" class="user-menu hidden" role="menu">
+            <div class="user-menu-profile">
+              <strong id="userMenuName">Usuari</strong>
+              <span id="userMenuEmail">—</span>
+            </div>
+            <button type="button" data-user-action="settings" role="menuitem">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+              Configuració
+            </button>
+            <button type="button" data-user-action="backup" role="menuitem">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+              Descarrega una còpia
+            </button>
+            <button type="button" data-user-action="help" role="menuitem">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.4 2.4 0 1 1 3.8 2c-.9.6-1.5 1-1.5 2.2M12 17h.01"/></svg>
+              Ajuda
+            </button>
+            <div class="menu-separator"></div>
+            <button id="logoutButton" class="danger-menu-item" type="button" role="menuitem">
+              <svg viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></svg>
+              Tanca la sessió
+            </button>
           </div>
         </div>
+      </div>
+    </header>
 
-        <nav id="scheduleTabs" class="segmented-control" aria-label="Vistes de l'horari">
-          <button class="segmented-control__button active" type="button" data-schedule-view="week">Setmanal</button>
-          <button class="segmented-control__button" type="button" data-schedule-view="year">Anual</button>
+    <div id="sidebarBackdrop" class="sidebar-backdrop hidden"></div>
+
+    <div class="app-layout">
+      <aside id="sidebar" class="sidebar" aria-label="Navegació principal">
+        <nav class="sidebar-nav">
+          <p class="sidebar-section-label">Principal</p>
+
+          <button class="nav-item active" type="button" data-section="schedule" data-title="Horari">
+            <svg viewBox="0 0 24 24"><path d="M7 2v3M17 2v3M3.5 9h17M5.5 4h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>
+            <span>Horari</span>
+          </button>
+
+          <button class="nav-item" type="button" data-section="library" data-title="Lliçonari">
+            <svg viewBox="0 0 24 24"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Z"/><path d="M5 19h15M9 7h7M9 11h7"/></svg>
+            <span>Lliçonari</span>
+          </button>
+
+          <p class="sidebar-section-label sidebar-tools-label">Eines</p>
+
+          <button class="nav-item" type="button" data-section="settings" data-title="Configuració">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+            <span>Configuració</span>
+          </button>
+
+          <button id="sidebarHelpButton" class="nav-item" type="button">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.4 2.4 0 1 1 3.8 2c-.9.6-1.5 1-1.5 2.2M12 17h.01"/></svg>
+            <span>Ajuda</span>
+          </button>
         </nav>
 
-        <section id="weekView" class="card schedule-card">
-          <div class="card__header week-header">
-            <div>
-              <p class="eyebrow">Setmana seleccionada</p>
-              <h2 id="weekTitle">Planificació setmanal</h2>
-              <p id="weekRange" class="muted">—</p>
-            </div>
-            <div class="week-header__actions">
-              <button id="prevWeek" class="button button--secondary button--icon-text" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-                <span>Anterior</span>
-              </button>
-              <button id="todayWeek" class="button button--soft" type="button">Avui</button>
-              <button id="nextWeek" class="button button--secondary button--icon-text" type="button">
-                <span>Següent</span>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="week-summary" aria-live="polite">
-            <span id="weekBadge" class="pill">Setmana —</span>
-            <span id="weekActivityCount">0 activitats planificades</span>
-          </div>
-
-          <div class="table-scroll">
-            <table id="weekGrid" class="week-grid" aria-label="Horari setmanal"></table>
-          </div>
-        </section>
-
-        <section id="yearView" class="card hidden">
-          <div class="card__header">
-            <div>
-              <p class="eyebrow">Navegació anual</p>
-              <h2>Calendari de setmanes</h2>
-              <p class="muted">Obre qualsevol setmana per revisar o modificar la programació.</p>
-            </div>
-            <div class="year-navigation">
-              <button id="prevYear" class="icon-button icon-button--soft" type="button" aria-label="Any anterior">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-              <strong id="yearLabel">—</strong>
-              <button id="nextYear" class="icon-button icon-button--soft" type="button" aria-label="Any següent">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-            </div>
-          </div>
-          <div id="yearGrid" class="year-grid"></div>
-        </section>
-      </section>
-
-      <section id="viewLessonbook" class="view-panel hidden">
-        <div class="page-heading">
-          <div>
-            <p class="eyebrow">Historial docent</p>
-            <h1>Lliçonari</h1>
-            <p>Cerca totes les activitats planificades a l'horari i prepara una relació imprimible per curs i assignatura.</p>
-          </div>
+        <div class="sidebar-footer">
+          <button id="sidebarThemeToggle" class="sidebar-theme" type="button">
+            <span class="theme-icon-wrap">
+              <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+              <svg class="icon-moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8 8 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+            </span>
+            <span class="sidebar-theme-label">Canvia el tema</span>
+          </button>
+          <small>Programeta v2.0</small>
         </div>
+      </aside>
 
-        <section class="card">
-          <div class="card__header">
+      <main id="mainContent" class="main-content" tabindex="-1">
+        <!-- HORARI -->
+        <section id="pageSchedule" class="page-section">
+          <header class="page-heading">
             <div>
-              <h2>Cerca d'activitats</h2>
-              <p class="muted">Els resultats es calculen a partir de l'horari, incloses les activitats recurrents.</p>
+              <p class="eyebrow">Planificació docent</p>
+              <h1>Horari</h1>
+              <p>Organitza les sessions i consulta tota la programació del curs.</p>
             </div>
+            <button id="newActivityButton" class="button button-primary" type="button">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              Nova activitat
+            </button>
+          </header>
+
+          <div class="segmented-control" role="tablist" aria-label="Vistes de l'horari">
+            <button class="segment active" type="button" role="tab" aria-selected="true" data-schedule-view="week">Setmanal</button>
+            <button class="segment" type="button" role="tab" aria-selected="false" data-schedule-view="year">Anual</button>
           </div>
 
-          <form id="lessonFilters" class="filter-grid">
-            <label class="field">
-              <span>Curs</span>
-              <input id="filterCourse" list="courseOptions" type="text" placeholder="Tots els cursos" autocomplete="off">
-            </label>
-            <label class="field">
-              <span>Assignatura</span>
-              <input id="filterSubject" list="subjectOptions" type="text" placeholder="Totes les assignatures" autocomplete="off">
-            </label>
-            <label class="field field--wide">
-              <span>Text de l'activitat</span>
-              <input id="filterText" type="search" placeholder="Per exemple: percussió corporal">
-            </label>
-            <label class="field">
-              <span>Des de</span>
-              <input id="filterFrom" type="date">
-            </label>
-            <label class="field">
-              <span>Fins a</span>
-              <input id="filterUntil" type="date">
-            </label>
-            <div class="filter-actions">
-              <button id="clearFilters" class="button button--secondary" type="button">Neteja</button>
-              <button class="button button--primary" type="submit">Cerca</button>
-            </div>
-          </form>
+          <section id="weekView" class="schedule-view">
+            <div class="calendar-toolbar card">
+              <div class="calendar-navigation">
+                <button id="previousWeekButton" class="icon-text-button" type="button">
+                  <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                  <span>Anterior</span>
+                </button>
 
-          <datalist id="courseOptions"></datalist>
-          <datalist id="subjectOptions"></datalist>
+                <div class="calendar-title">
+                  <strong id="weekLabel">Setmana —</strong>
+                  <span id="weekRange">—</span>
+                </div>
 
-          <div class="results-toolbar">
-            <div>
-              <strong id="resultsCount">0 resultats</strong>
-              <span id="resultsDescription" class="muted">Aplica els filtres per consultar el lliçonari.</span>
-            </div>
-            <div class="results-toolbar__actions">
-              <button id="printResults" class="button button--secondary button--icon-text" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
-                <span>Imprimeix</span>
-              </button>
-              <button id="exportCsv" class="button button--secondary button--icon-text" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
-                <span>CSV</span>
-              </button>
-            </div>
-          </div>
+                <button id="nextWeekButton" class="icon-text-button" type="button">
+                  <span>Següent</span>
+                  <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
 
-          <div id="lessonResults" class="lesson-results" aria-live="polite"></div>
+              <div class="calendar-actions">
+                <button id="todayButton" class="button button-secondary" type="button">Avui</button>
+                <span id="weekActivityCount" class="count-badge">0 activitats</span>
+                <div class="view-switch" aria-label="Mode de visualització">
+                  <button class="active" type="button" data-week-mode="grid" title="Graella">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                  </button>
+                  <button type="button" data-week-mode="agenda" title="Agenda">
+                    <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="weekGridCard" class="week-calendar-card card">
+              <div class="week-grid-scroll">
+                <table id="weekGrid" class="week-grid" aria-label="Horari setmanal"></table>
+              </div>
+            </div>
+
+            <div id="agendaView" class="agenda-view hidden" aria-label="Agenda setmanal"></div>
+          </section>
+
+          <section id="yearView" class="schedule-view hidden">
+            <div class="calendar-toolbar card">
+              <div class="calendar-navigation">
+                <button id="previousAcademicYearButton" class="icon-text-button" type="button">
+                  <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                  <span>Curs anterior</span>
+                </button>
+                <div class="calendar-title">
+                  <strong id="academicYearLabel">Curs —</strong>
+                  <span id="academicYearRange">—</span>
+                </div>
+                <button id="nextAcademicYearButton" class="icon-text-button" type="button">
+                  <span>Curs següent</span>
+                  <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
+              <button id="currentAcademicYearButton" class="button button-secondary" type="button">Curs actual</button>
+            </div>
+
+            <div id="yearCalendar" class="year-calendar"></div>
+          </section>
         </section>
-      </section>
-    </main>
-  </div>
 
-  <footer id="appFooter" class="footer hidden">
-    <div class="footer__inner">
-      <div>
-        <strong>Programeta</strong>
-        <span>La llibreta docent digital.</span>
-      </div>
-      <span>© <span id="currentYear"></span> Programeta</span>
+        <!-- LLIÇONARI -->
+        <section id="pageLibrary" class="page-section hidden">
+          <header class="page-heading">
+            <div>
+              <p class="eyebrow">Historial d'activitats</p>
+              <h1>Lliçonari</h1>
+              <p>Consulta totes les activitats planificades per curs, assignatura i data.</p>
+            </div>
+          </header>
+
+          <section class="filter-card card" aria-label="Filtres del lliçonari">
+            <div class="filter-grid">
+              <label class="field">
+                <span>Curs</span>
+                <select id="filterCourse"><option value="">Tots els cursos</option></select>
+              </label>
+              <label class="field">
+                <span>Assignatura</span>
+                <select id="filterSubject"><option value="">Totes les assignatures</option></select>
+              </label>
+              <label class="field filter-search">
+                <span>Cerca</span>
+                <span class="input-with-icon">
+                  <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                  <input id="filterSearch" type="search" placeholder="Activitat o notes..." />
+                </span>
+              </label>
+            </div>
+
+            <details id="advancedFilters" class="advanced-filters">
+              <summary>Més filtres</summary>
+              <div class="advanced-filter-grid">
+                <label class="field">
+                  <span>Des de</span>
+                  <input id="filterStartDate" type="date" />
+                </label>
+                <label class="field">
+                  <span>Fins a</span>
+                  <input id="filterEndDate" type="date" />
+                </label>
+                <label class="field">
+                  <span>Tipus</span>
+                  <select id="filterType">
+                    <option value="">Tots</option>
+                    <option value="ocasional">Ocasional</option>
+                    <option value="permanent">Recurrent</option>
+                  </select>
+                </label>
+              </div>
+            </details>
+
+            <div id="activeFilterChips" class="filter-chips"></div>
+
+            <div class="filter-footer">
+              <button id="clearFiltersButton" class="text-button" type="button">Neteja els filtres</button>
+              <div class="filter-actions">
+                <button id="printLibraryButton" class="button button-secondary" type="button">
+                  <svg viewBox="0 0 24 24"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+                  Imprimeix
+                </button>
+                <button id="exportLibraryButton" class="button button-primary" type="button">
+                  <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                  Exporta CSV
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="results-section">
+            <div class="results-heading">
+              <h2>Resultats</h2>
+              <span id="libraryResultCount">0 activitats</span>
+            </div>
+
+            <div id="libraryEmptyState" class="empty-state card">
+              <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Z"/><path d="M5 19h15M9 7h7M9 11h7"/></svg>
+              </div>
+              <h3>Encara no hi ha resultats</h3>
+              <p>Selecciona un curs, una assignatura o escriu una cerca per consultar les activitats.</p>
+            </div>
+
+            <div id="libraryTableWrap" class="responsive-table-wrap card hidden">
+              <table class="library-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Curs</th>
+                    <th>Assignatura</th>
+                    <th>Activitat</th>
+                    <th>Hora</th>
+                    <th>Tipus</th>
+                  </tr>
+                </thead>
+                <tbody id="libraryTableBody"></tbody>
+              </table>
+            </div>
+
+            <div id="libraryCards" class="library-cards hidden"></div>
+          </section>
+        </section>
+
+        <!-- CONFIGURACIÓ -->
+        <section id="pageSettings" class="page-section hidden">
+          <header class="page-heading">
+            <div>
+              <p class="eyebrow">Personalitza Programeta</p>
+              <h1>Configuració</h1>
+              <p>Adapta el curs, les franges i les opcions de l'aplicació a la teva manera de treballar.</p>
+            </div>
+          </header>
+
+          <div class="settings-layout">
+            <section class="settings-card card">
+              <div class="settings-card-heading">
+                <div>
+                  <h2>Curs acadèmic</h2>
+                  <p>Defineix el període que es mostrarà a la vista anual i al lliçonari.</p>
+                </div>
+              </div>
+              <div class="two-column-fields">
+                <label class="field">
+                  <span>Data d'inici</span>
+                  <input id="settingsAcademicStart" type="date" />
+                </label>
+                <label class="field">
+                  <span>Data de finalització</span>
+                  <input id="settingsAcademicEnd" type="date" />
+                </label>
+              </div>
+            </section>
+
+            <section class="settings-card card">
+              <div class="settings-card-heading">
+                <div>
+                  <h2>Franges horàries</h2>
+                  <p>Aquestes franges definiran les files del calendari setmanal.</p>
+                </div>
+                <button id="addTimeSlotButton" class="button button-secondary" type="button">
+                  <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                  Afegeix
+                </button>
+              </div>
+              <div id="timeSlotList" class="sortable-list"></div>
+            </section>
+
+            <section class="settings-card card">
+              <div class="settings-card-heading">
+                <div>
+                  <h2>Cursos</h2>
+                  <p>Els podràs seleccionar en crear una activitat i utilitzar als filtres.</p>
+                </div>
+              </div>
+              <div class="inline-add-form">
+                <input id="newCourseInput" type="text" maxlength="30" placeholder="P. ex. 5è" />
+                <button id="addCourseButton" class="button button-secondary" type="button">Afegeix</button>
+              </div>
+              <div id="courseTagList" class="tag-list"></div>
+            </section>
+
+            <section class="settings-card card">
+              <div class="settings-card-heading">
+                <div>
+                  <h2>Assignatures</h2>
+                  <p>Evita duplicats i mantén els filtres sempre coherents.</p>
+                </div>
+              </div>
+              <div class="inline-add-form">
+                <input id="newSubjectInput" type="text" maxlength="60" placeholder="P. ex. Música" />
+                <button id="addSubjectButton" class="button button-secondary" type="button">Afegeix</button>
+              </div>
+              <div id="subjectTagList" class="tag-list"></div>
+            </section>
+
+            <section class="settings-card card">
+              <div class="settings-card-heading">
+                <div>
+                  <h2>Aparença</h2>
+                  <p>Escull el tema que et resulti més còmode.</p>
+                </div>
+              </div>
+              <label class="field">
+                <span>Tema</span>
+                <select id="settingsTheme">
+                  <option value="system">Segueix el sistema</option>
+                  <option value="light">Clar</option>
+                  <option value="dark">Fosc umbra</option>
+                </select>
+              </label>
+            </section>
+
+            <section class="settings-card card settings-data-card">
+              <div class="settings-card-heading">
+                <div>
+                  <h2>Dades i còpies</h2>
+                  <p>Descarrega o restaura una còpia de la teva informació.</p>
+                </div>
+              </div>
+              <div class="data-actions">
+                <button id="exportBackupButton" class="button button-secondary" type="button">Descarrega una còpia JSON</button>
+                <label class="button button-secondary file-button">
+                  Restaura una còpia
+                  <input id="importBackupInput" type="file" accept="application/json" hidden />
+                </label>
+              </div>
+            </section>
+          </div>
+
+          <div class="settings-save-bar">
+            <span id="settingsSaveStatus">Sense canvis pendents</span>
+            <button id="saveSettingsButton" class="button button-primary" type="button">Desa la configuració</button>
+          </div>
+        </section>
+      </main>
     </div>
-  </footer>
 
-  <dialog id="entryDialog" class="dialog dialog--entry" aria-labelledby="entryDialogTitle">
-    <form id="entryForm" class="dialog__content" novalidate>
-      <div class="dialog__header">
+    <nav class="mobile-bottom-nav" aria-label="Navegació mòbil">
+      <button class="active" type="button" data-section="schedule" data-title="Horari">
+        <svg viewBox="0 0 24 24"><path d="M7 2v3M17 2v3M3.5 9h17M5.5 4h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>
+        <span>Horari</span>
+      </button>
+      <button type="button" data-section="library" data-title="Lliçonari">
+        <svg viewBox="0 0 24 24"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5v-17Z"/><path d="M5 19h15M9 7h7M9 11h7"/></svg>
+        <span>Lliçonari</span>
+      </button>
+    </nav>
+  </section>
+
+  <!-- =======================================================
+       PANELL D'ACTIVITAT
+       ======================================================= -->
+  <div id="activityBackdrop" class="drawer-backdrop hidden"></div>
+  <aside id="activityDrawer" class="activity-drawer" aria-hidden="true" aria-labelledby="activityDrawerTitle">
+    <form id="activityForm" class="drawer-form" novalidate>
+      <header class="drawer-header">
         <div>
-          <p class="eyebrow">Franja horària</p>
-          <h2 id="entryDialogTitle">Afegeix una activitat</h2>
-          <p id="entryContext" class="muted"></p>
+          <p class="eyebrow">Planificació</p>
+          <h2 id="activityDrawerTitle">Nova activitat</h2>
         </div>
-        <button id="closeEntryDialog" class="icon-button icon-button--soft" type="button" aria-label="Tanca">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        <button id="closeActivityDrawerButton" class="round-icon-button" type="button" aria-label="Tanca el formulari">
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
         </button>
-      </div>
+      </header>
 
-      <div class="form-grid">
+      <div class="drawer-body">
+        <input id="activityId" type="hidden" />
+        <input id="activityOriginalType" type="hidden" />
+
+        <div class="two-column-fields">
+          <label class="field">
+            <span>Data</span>
+            <input id="activityDate" type="date" required />
+          </label>
+          <label class="field">
+            <span>Franja horària</span>
+            <select id="activityTimeSlot" required></select>
+          </label>
+        </div>
+
+        <div class="two-column-fields">
+          <label class="field">
+            <span>Curs</span>
+            <input id="activityCourse" type="text" list="courseSuggestions" required maxlength="30" placeholder="P. ex. 5è" />
+            <datalist id="courseSuggestions"></datalist>
+          </label>
+          <label class="field">
+            <span>Assignatura</span>
+            <input id="activitySubject" type="text" list="subjectSuggestions" required maxlength="60" placeholder="P. ex. Música" />
+            <datalist id="subjectSuggestions"></datalist>
+          </label>
+        </div>
+
         <label class="field">
-          <span>Curs</span>
-          <input id="entryCourse" type="text" maxlength="50" required placeholder="5è">
+          <span>Activitat</span>
+          <input id="activityTitle" type="text" required maxlength="180" placeholder="P. ex. Percussió corporal" />
         </label>
+
         <label class="field">
-          <span>Assignatura</span>
-          <input id="entrySubject" type="text" maxlength="80" required placeholder="Música">
+          <span>Notes <small>Opcional</small></span>
+          <textarea id="activityNotes" rows="5" maxlength="2000" placeholder="Objectius, materials, observacions..."></textarea>
         </label>
-        <label class="field field--full">
-          <span>Activitat o lliçó</span>
-          <input id="entryActivity" type="text" maxlength="180" required placeholder="Percussió corporal">
-        </label>
-        <label class="field field--full">
-          <span>Notes</span>
-          <textarea id="entryNotes" rows="4" maxlength="1500" placeholder="Objectius, materials, observacions o adaptacions…"></textarea>
-        </label>
-        <label class="field field--full">
+
+        <label class="field">
           <span>Repetició</span>
-          <select id="entryType">
+          <select id="activityType">
             <option value="ocasional">Només aquesta setmana</option>
             <option value="permanent">Cada setmana</option>
           </select>
-          <small id="entryTypeHelp">L'activitat puntual substitueix una activitat recurrent només durant aquesta setmana.</small>
         </label>
-        <label id="activeFromField" class="field">
-          <span>Recurrent des de</span>
-          <input id="entryActiveFrom" type="date">
-        </label>
-        <label id="activeUntilField" class="field">
-          <span>Recurrent fins a</span>
-          <input id="entryActiveUntil" type="date">
-        </label>
+
+        <div id="recurrenceFields" class="recurrence-fields hidden">
+          <div class="two-column-fields">
+            <label class="field">
+              <span>Comença</span>
+              <input id="recurrenceStart" type="date" />
+            </label>
+            <label class="field">
+              <span>Finalitza</span>
+              <input id="recurrenceEnd" type="date" />
+            </label>
+          </div>
+          <p class="field-help">L'activitat apareixerà cada setmana dins d'aquest període.</p>
+        </div>
       </div>
 
-      <p id="entryError" class="form-error hidden" role="alert"></p>
-
-      <div class="dialog__actions">
-        <button id="deleteEntry" class="button button--danger hidden" type="button">Elimina</button>
-        <button id="skipEntry" class="button button--secondary hidden" type="button">Omet aquesta setmana</button>
-        <span class="dialog__spacer"></span>
-        <button id="cancelEntry" class="button button--secondary" type="button">Cancel·la</button>
-        <button id="saveEntry" class="button button--primary" type="submit">Desa l'activitat</button>
-      </div>
+      <footer class="drawer-footer">
+        <div class="drawer-destructive-actions">
+          <button id="skipOccurrenceButton" class="button button-quiet hidden" type="button">No la facis aquesta setmana</button>
+          <button id="deleteActivityButton" class="button button-danger hidden" type="button">Elimina</button>
+        </div>
+        <div class="drawer-primary-actions">
+          <button id="cancelActivityButton" class="button button-secondary" type="button">Cancel·la</button>
+          <button id="saveActivityButton" class="button button-primary" type="submit">Desa l'activitat</button>
+        </div>
+      </footer>
     </form>
+  </aside>
+
+  <!-- AJUDA -->
+  <dialog id="helpDialog" class="dialog dialog-large">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">Guia ràpida</p>
+        <h2>Com funciona Programeta?</h2>
+      </div>
+      <button class="round-icon-button" type="button" data-dialog-close="helpDialog" aria-label="Tanca l'ajuda">
+        <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="help-grid">
+      <article>
+        <span>1</span>
+        <h3>Planifica</h3>
+        <p>Clica una cel·la del calendari o utilitza «Nova activitat».</p>
+      </article>
+      <article>
+        <span>2</span>
+        <h3>Decideix la repetició</h3>
+        <p>Desa una activitat puntual o fes que es repeteixi cada setmana.</p>
+      </article>
+      <article>
+        <span>3</span>
+        <h3>Consulta</h3>
+        <p>Utilitza el lliçonari per recuperar totes les activitats fetes.</p>
+      </article>
+    </div>
+    <footer class="dialog-footer">
+      <button class="button button-primary" type="button" data-dialog-close="helpDialog">Entesos</button>
+    </footer>
   </dialog>
 
-  <dialog id="authDialog" class="dialog dialog--auth" aria-labelledby="authTitle">
-    <form id="authForm" class="dialog__content" novalidate>
-      <div class="auth-brand">
-        <img src="assets/logo-icon.svg" alt="" width="58" height="58">
-        <div>
-          <p class="eyebrow">Benvingut/da</p>
-          <h2 id="authTitle">Inicia sessió</h2>
-          <p id="authSubtitle" class="muted">Accedeix al teu horari des de qualsevol dispositiu.</p>
-        </div>
-      </div>
-
-      <label id="authNameField" class="field hidden">
-        <span>Nom</span>
-        <input id="authName" type="text" maxlength="80" autocomplete="name" placeholder="El teu nom">
-      </label>
-      <label class="field">
-        <span>Correu electrònic</span>
-        <input id="authEmail" type="email" autocomplete="email" required placeholder="nom@exemple.cat">
-      </label>
-      <label class="field">
-        <span>Contrasenya</span>
-        <span class="password-field">
-          <input id="authPassword" type="password" minlength="6" autocomplete="current-password" required placeholder="Mínim 6 caràcters">
-          <button id="togglePassword" class="password-toggle" type="button" aria-label="Mostra la contrasenya">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </span>
-      </label>
-
-      <p id="authError" class="form-error hidden" role="alert"></p>
-      <p id="authSuccess" class="form-success hidden" role="status"></p>
-
-      <button id="authSubmit" class="button button--primary button--full" type="submit">Entra</button>
-      <button id="resetPassword" class="text-button" type="button">He oblidat la contrasenya</button>
-
-      <div class="auth-switch">
-        <span id="authSwitchText">Encara no tens compte?</span>
-        <button id="switchAuthMode" class="text-button text-button--strong" type="button">Crea'n un</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="settingsDialog" class="dialog dialog--settings" aria-labelledby="settingsTitle">
-    <form id="settingsForm" class="dialog__content" novalidate>
-      <div class="dialog__header">
-        <div>
-          <p class="eyebrow">Preferències</p>
-          <h2 id="settingsTitle">Configuració</h2>
-          <p class="muted">Adapta l'horari al teu centre i conserva una còpia de seguretat.</p>
-        </div>
-        <button id="closeSettings" class="icon-button icon-button--soft" type="button" aria-label="Tanca">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-        </button>
-      </div>
-
-      <div class="settings-section">
-        <h3>Curs acadèmic</h3>
-        <div class="form-grid">
-          <label class="field">
-            <span>Data d'inici</span>
-            <input id="academicYearStart" type="date" required>
-          </label>
-          <label class="field">
-            <span>Data de finalització</span>
-            <input id="academicYearEnd" type="date" required>
-          </label>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Franges horàries</h3>
-        <label class="field">
-          <span>Una franja per línia, amb el format HH:MM-HH:MM</span>
-          <textarea id="timeSlots" rows="7" spellcheck="false"></textarea>
-        </label>
-      </div>
-
-      <div class="settings-section">
-        <h3>Còpia de seguretat</h3>
-        <p class="muted">Descarrega totes les dades o restaura una còpia JSON.</p>
-        <div class="backup-actions">
-          <button id="exportBackup" class="button button--secondary" type="button">Descarrega còpia</button>
-          <label class="button button--secondary file-button">
-            Restaura còpia
-            <input id="importBackup" type="file" accept="application/json,.json">
-          </label>
-        </div>
-      </div>
-
-      <p id="settingsError" class="form-error hidden" role="alert"></p>
-      <div class="dialog__actions">
-        <span class="dialog__spacer"></span>
-        <button id="cancelSettings" class="button button--secondary" type="button">Cancel·la</button>
-        <button class="button button--primary" type="submit">Desa els canvis</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="confirmDialog" class="dialog dialog--confirm" aria-labelledby="confirmTitle">
-    <div class="dialog__content">
-      <div class="confirm-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.6 2.4 17.3A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.7L13.7 3.6a2 2 0 0 0-3.4 0Z"/></svg>
-      </div>
-      <h2 id="confirmTitle">Confirmació</h2>
-      <p id="confirmMessage" class="muted"></p>
-      <div class="dialog__actions">
-        <button id="confirmCancel" class="button button--secondary" type="button">Cancel·la</button>
-        <button id="confirmAccept" class="button button--danger" type="button">Confirma</button>
-      </div>
+  <!-- CONFIRMACIÓ -->
+  <dialog id="confirmDialog" class="dialog dialog-small">
+    <div class="confirm-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.8 2.6 17.1A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.9L13.7 3.8a2 2 0 0 0-3.4 0Z"/></svg>
+    </div>
+    <h2 id="confirmTitle">Confirma l'acció</h2>
+    <p id="confirmMessage">Aquesta acció no es pot desfer.</p>
+    <div class="dialog-actions">
+      <button id="confirmCancelButton" class="button button-secondary" type="button">Cancel·la</button>
+      <button id="confirmAcceptButton" class="button button-danger" type="button">Confirma</button>
     </div>
   </dialog>
 
+  <!-- TOASTS I CÀRREGA -->
   <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <div id="globalLoader" class="global-loader hidden" role="status" aria-label="Carregant">
+    <span class="loader-spinner"></span>
+  </div>
+
+  <noscript>
+    <div class="noscript-message">Programeta necessita JavaScript per funcionar.</div>
+  </noscript>
 
   <script type="module" src="js/app.firebase.js"></script>
 </body>
