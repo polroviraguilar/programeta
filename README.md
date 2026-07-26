@@ -1,4 +1,4 @@
-# Programeta Premium
+# Programeta
 
 Programeta és una llibreta docent digital pensada per planificar l'horari setmanal, consultar l'any complet i generar un lliçonari a partir de totes les activitats programades.
 
