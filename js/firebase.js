@@ -15,6 +15,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   getFirestore,
   onSnapshot,
@@ -37,26 +38,44 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-const persistenceReady = setPersistence(auth, browserLocalPersistence).catch(error => {
-  console.warn('No s\'ha pogut activar la persistència local de la sessió.', error);
+setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.warn('No s\'ha pogut establir la persistència local de la sessió.', error);
 });
 
-export function watchAuth(callback) {
+function userRef(uid) {
+  return doc(db, 'users', uid);
+}
+
+function activitiesRef(uid) {
+  return collection(db, 'users', uid, 'horariSetmanal');
+}
+
+function activityRef(uid, activityId) {
+  return doc(db, 'users', uid, 'horariSetmanal', activityId);
+}
+
+function settingsRef(uid) {
+  return doc(db, 'users', uid, 'settings', 'general');
+}
+
+export function subscribeAuth(callback) {
   return onAuthStateChanged(auth, callback);
 }
 
-export async function login(email, password) {
-  await persistenceReady;
+export async function loginWithEmail(email, password) {
   return signInWithEmailAndPassword(auth, email.trim(), password);
 }
 
-export async function register(displayName, email, password) {
-  await persistenceReady;
+export async function registerWithEmail(name, email, password) {
   const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
-  const cleanName = displayName.trim();
-  if (cleanName) {
-    await updateProfile(credential.user, { displayName: cleanName });
-  }
+  await updateProfile(credential.user, { displayName: name.trim() });
+  await setDoc(userRef(credential.user.uid), {
+    displayName: name.trim(),
+    email: credential.user.email,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    schemaVersion: 2
+  }, { merge: true });
   return credential;
 }
 
@@ -68,92 +87,156 @@ export async function logout() {
   return signOut(auth);
 }
 
-function scheduleCollection(uid) {
-  return collection(db, 'users', uid, 'horariSetmanal');
+export async function ensureUserProfile(user) {
+  if (!user) return;
+  await setDoc(userRef(user.uid), {
+    displayName: user.displayName || '',
+    email: user.email || '',
+    updatedAt: serverTimestamp(),
+    schemaVersion: 2
+  }, { merge: true });
 }
 
-function settingsDocument(uid) {
-  return doc(db, 'users', uid, 'settings', 'preferences');
+export async function getUserProfile(uid) {
+  const snapshot = await getDoc(userRef(uid));
+  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
 }
 
-export function watchScheduleEntries(uid, onData, onError = console.error) {
+export async function getUserSettings(uid) {
+  const snapshot = await getDoc(settingsRef(uid));
+  return snapshot.exists() ? snapshot.data() : null;
+}
+
+export async function saveUserSettings(uid, settings) {
+  await setDoc(settingsRef(uid), {
+    ...settings,
+    updatedAt: serverTimestamp(),
+    schemaVersion: 2
+  }, { merge: true });
+}
+
+export function subscribeActivities(uid, onData, onError) {
   return onSnapshot(
-    scheduleCollection(uid),
+    activitiesRef(uid),
     snapshot => {
-      onData(snapshot.docs.map(item => ({ id: item.id, ...item.data() })));
+      const rows = snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+      onData(rows);
     },
     onError
   );
 }
 
-export async function saveScheduleEntry(uid, entry, id = null) {
-  const payload = {
-    ...entry,
-    updatedAt: serverTimestamp()
-  };
+export async function listAllActivities(uid) {
+  const snapshot = await getDocs(activitiesRef(uid));
+  return snapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+}
 
-  if (id) {
-    await updateDoc(doc(db, 'users', uid, 'horariSetmanal', id), payload);
-    return id;
-  }
-
-  const reference = await addDoc(scheduleCollection(uid), {
-    ...payload,
-    createdAt: serverTimestamp()
+export async function addActivity(uid, activity) {
+  return addDoc(activitiesRef(uid), {
+    ...activity,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    schemaVersion: 2
   });
-  return reference.id;
 }
 
-export async function removeScheduleEntry(uid, id) {
-  await deleteDoc(doc(db, 'users', uid, 'horariSetmanal', id));
+export async function updateActivity(uid, activityId, activity) {
+  return updateDoc(activityRef(uid, activityId), {
+    ...activity,
+    updatedAt: serverTimestamp(),
+    schemaVersion: 2
+  });
 }
 
-export function watchPreferences(uid, onData, onError = console.error) {
-  return onSnapshot(
-    settingsDocument(uid),
-    snapshot => onData(snapshot.exists() ? snapshot.data() : null),
-    onError
-  );
+export async function deleteActivity(uid, activityId) {
+  return deleteDoc(activityRef(uid, activityId));
 }
 
-export async function savePreferences(uid, preferences) {
-  await setDoc(settingsDocument(uid), {
-    ...preferences,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
+export async function createOccurrenceException(uid, permanentActivity, year, week, date) {
+  return addDoc(activitiesRef(uid), {
+    tipus: 'excepcio',
+    any: year,
+    setmana: week,
+    data: date,
+    dia: permanentActivity.dia,
+    hora: permanentActivity.hora,
+    referenciaPermanentId: permanentActivity.id,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    schemaVersion: 2
+  });
 }
 
-export async function replaceScheduleEntries(uid, entries) {
-  const current = await getDocs(scheduleCollection(uid));
-  let batch = writeBatch(db);
-  let operations = 0;
+export async function exportUserBackup(uid) {
+  const [profile, settings, activities] = await Promise.all([
+    getUserProfile(uid),
+    getUserSettings(uid),
+    listAllActivities(uid)
+  ]);
 
-  const commitIfNeeded = async force => {
-    if (operations === 0) return;
-    if (force || operations >= 400) {
-      await batch.commit();
-      batch = writeBatch(db);
-      operations = 0;
-    }
+  return {
+    format: 'programeta-backup',
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    profile,
+    settings,
+    activities: activities.map(({ id, createdAt, updatedAt, ...activity }) => ({
+      originalId: id,
+      ...activity
+    }))
   };
+}
 
-  for (const item of current.docs) {
-    batch.delete(item.ref);
-    operations += 1;
-    await commitIfNeeded(false);
+export async function restoreUserBackup(uid, backup) {
+  if (!backup || backup.format !== 'programeta-backup' || !Array.isArray(backup.activities)) {
+    throw new Error('El fitxer no és una còpia vàlida de Programeta.');
   }
 
-  for (const entry of entries) {
-    const reference = doc(scheduleCollection(uid));
-    const { id: _ignoredId, createdAt: _ignoredCreatedAt, updatedAt: _ignoredUpdatedAt, ...cleanEntry } = entry;
-    batch.set(reference, {
-      ...cleanEntry,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+  const existingSnapshot = await getDocs(activitiesRef(uid));
+  const writeOperations = [];
+
+  existingSnapshot.docs.forEach(existing => {
+    writeOperations.push({ type: 'delete', ref: existing.ref });
+  });
+
+  backup.activities.forEach((activity, index) => {
+    const { originalId, ...data } = activity;
+    const reference = originalId
+      ? activityRef(uid, originalId)
+      : doc(activitiesRef(uid));
+
+    writeOperations.push({
+      type: 'set',
+      ref: reference,
+      data: {
+        ...data,
+        restoredAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        schemaVersion: 2,
+        restoreOrder: index
+      }
     });
-    operations += 1;
-    await commitIfNeeded(false);
+  });
+
+  for (let offset = 0; offset < writeOperations.length; offset += 450) {
+    const batch = writeBatch(db);
+    writeOperations.slice(offset, offset + 450).forEach(operation => {
+      if (operation.type === 'delete') batch.delete(operation.ref);
+      else batch.set(operation.ref, operation.data, { merge: false });
+    });
+    await batch.commit();
   }
 
-  await commitIfNeeded(true);
+  if (backup.settings) {
+    await saveUserSettings(uid, backup.settings);
+  }
+
+  if (backup.profile) {
+    const { id, createdAt, updatedAt, ...profileData } = backup.profile;
+    await setDoc(userRef(uid), {
+      ...profileData,
+      updatedAt: serverTimestamp(),
+      schemaVersion: 2
+    }, { merge: true });
+  }
 }
