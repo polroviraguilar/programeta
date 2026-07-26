@@ -1,1 +1,35 @@
+{
+  "product": "Programeta",
+  "version": 2,
+  "preferences": {
+    "academicYearStart": "2026-09-01",
+    "academicYearEnd": "2027-06-30",
+    "timeSlots": [
+      "09:00-10:00",
+      "10:00-11:00",
+      "11:30-12:30",
+      "12:30-13:30",
+      "15:00-16:00",
+      "16:00-17:00"
+    ]
+  },
+  "entries": [
+    {
+      "dia": "dilluns",
+      "dayIndex": 1,
+      "hora": "09:00-10:00",
+      "startTime": "09:00",
+      "endTime": "10:00",
+      "curs": "5è",
+      "assignatura": "Música",
+      "activitat": "Percussió corporal",
+      "notes": "Treball de pulsació, coordinació i escolta de grup.",
+      "tipus": "permanent",
+      "any": 0,
+      "setmana": 0,
+      "activeFrom": "2026-09-01",
+      "activeUntil": "2027-06-30"
+    }
+  ]
+}
 
